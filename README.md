@@ -162,6 +162,8 @@ The Client initiates the login by interacting with the WebApp. The WebApp, actin
 
 #### Demo
 
+![auth-gif.gif](readme_assets%2Fauth-gif.gif)
+
 #### Sequence diagram
  
 ![auth_seq.png](readme_assets%2Fauth_seq.png)
