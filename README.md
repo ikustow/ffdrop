@@ -314,3 +314,10 @@ deactivate API
 ```
 
 </details>
+
+[CUSTOM CODE](https://github.com/ikustow/ffdrop/tree/main/ffdrop_app/lib/custom_code/actions)
+
+## My contacts
+- [Telegram](https://t.me/ikustow)
+- [Linkedin](https://www.linkedin.com/in/ikustow/)
+- [Email](mailto:ikustov.dev@gmail.com)
