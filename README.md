@@ -1,5 +1,4 @@
 # Airdropper
-
 # Description
 Application designed to demonstrate a Proof of Concept (PoC) for airdrop in the TON blockchain ecosystem.
 
@@ -29,8 +28,8 @@ Application Architecture
 | Jetton Service | [﻿github.com/ikustow/jettonflow](https://github.com/ikustow/jettonflow)  |
 | API Gateway | Biuldship |
 | Database | Supabase |
-[﻿View on canvas](https://app.eraser.io/workspace/t0KhFUgNuJQAzSI9y2XA?elements=_Rv_DoQ1YVuTODDTM1ZTqQ) 
 
+![arch.png](readme_assets%2Farch.png)
 ---
 
 ### USER STORIES
@@ -60,10 +59,12 @@ Application Architecture
 | UC6 | Send NFT | Client | The client initiates sending NFT via API Gateway. | NFT selected | NFT sent, job status updated |
 ### What Has Been Done So Far
 - **Custom Token Deployment**: A custom token was deployed using a standard token contract.
-здесь картинка
+
+![jettons.png](readme_assets%2Fjettons.png)
 
 - **NFT Collection Creation**: An NFT collection was created specifically for the airdrop.
-здесь картинка
+
+![nft.png](readme_assets%2Fnft.png)
 
 ---
 
@@ -71,7 +72,58 @@ Application Architecture
 The backend is structured through an API Gateway built on Buildship, with a database for controlling the execution of jobs for sending Jettons and NFTs on Supabase. Additionally, there are two Python microservices communicating with the blockchain through TonBridge.
 
 ### DATABASE ER-DIAGRAM
-Картинка
+
+![er.png](readme_assets%2Fer.png)
+
+<details>
+<summary>Diagram code</summary>
+
+```diagram code
+airdrop_limit [icon: dollar-sign, color: blue] {
+    id string pk
+    value number
+}
+
+jetton_rewards_jobs [icon: layers, color: green] {
+    id string
+    createdAt timestamp
+    updated_at timestamp
+    address string
+    status string
+}
+
+nft_rewards_jobs [icon: layers, color: green] {
+    id string
+    createdAt timestamp
+    updated_at timestamp
+    address string
+    status string
+}
+
+users [icon: users, color: green] {
+    id string pk
+    createdAt timestamp
+    address string
+    is_claimed bool
+}
+
+transactions [icon: align-justify, color: green] {
+    id string
+    createdAt timestamp
+    updated_at timestamp
+    job id
+    address string
+    status string
+}
+
+
+users.address <> nft_rewards_jobs.address
+users.address <> jetton_rewards_jobs.address
+jetton_rewards_jobs.address <> transactions.job
+
+```
+
+</details>
 
 Brief description of the database schema:
 
@@ -96,13 +148,11 @@ You can research them using the following links to the repositories.
 ### API GATAWAY DESCRIPTION
 The API Gateway is built using a low-code system called Buildship. Its primary role is to act as a bridge between the main application on FlutterFlow and the microservices and database.
 
-
-
-Картиника
+![api_ex.png](readme_assets%2Fapi_ex.png)
 
 A small trick, since the free version has limitations on commands, it was decided to create one method via POST with actions, and depending on the action passed in the request body, different operations are performed. An example of such implementation is shown in the screenshot.
 
-картинка
+![apiactions.png](readme_assets%2Fapiactions.png)
 
 ---
 
@@ -111,8 +161,40 @@ A small trick, since the free version has limitations on commands, it was decide
 The Client initiates the login by interacting with the WebApp. The WebApp, acting as an intermediary, communicates with Tonkeeper (wallet) and TonBlockchain (bridge) to establish a secure connection 
 
 #### Demo
+
 #### Sequence diagram
  
+![auth_seq.png](readme_assets%2Fauth_seq.png)
+
+<details>
+<summary>Diagram code</summary>
+
+```diagram code
+title Tonkeeper Login Process
+
+Client [icon: user, color: blue] > WebApp [icon: smartphone, color: green]: Login
+activate Client
+activate WebApp
+WebApp > TonBlockchain [icon: cloud, color: orange]: TonConnect init
+activate TonBlockchain
+
+TonBlockchain --> WebApp: Wallet connect settings
+WebApp > Client: Display QR code
+Client > Tonkeeper [icon: wallet, color: purple]: Scan QR
+activate Tonkeeper
+Tonkeeper > TonBlockchain: Wallet connection
+deactivate Tonkeeper
+
+TonBlockchain --> WebApp: Account info
+deactivate TonBlockchain
+
+
+deactivate WebApp
+deactivate Client
+
+```
+
+</details>
 
 ### AIRDROP CLAIM
 The airdrop claim process involves checking the user's status, generating jobs for transactions, followed by a redirect to the NFT page where the user can select an NFT and receive their unique asset.
@@ -120,4 +202,113 @@ The airdrop claim process involves checking the user's status, generating jobs f
 #### Demo
 #### Sequence diagram
 
+![claim_seq.png](readme_assets%2Fclaim_seq.png)
 
+<details>
+<summary>Diagram code</summary>
+
+```diagram code
+title CLAIM FLOW
+Client [icon: mobile, color:  yellow]
+API [icon: server, color: purple, label: "API Gateway"]
+db [icon: database, color: green, label: "Supabase"]
+NFT [icon: tool, color: orange, label: "NFT Service"]
+Jetton [icon: tool, color: orange, label: "Jetton Service"]
+TON [icon: cube, color: blue]
+
+Client > API: Get \checkUser
+activate API
+API > db: User request
+activate db
+db --> API: User result
+deactivate db
+API --> Client: Response \checkUser
+deactivate API
+
+Client > API: POST \createJobs
+activate API
+
+par [label: NFT jobs init] {
+  API > db: Create nft jobs
+ activate db
+ db --> API: Jobs result 
+ deactivate db
+ }
+and [label: Jetton jobs init] {
+ API > db: Create jetton jobs
+ activate db
+ db --> API: Jobs result
+ deactivate db
+}
+API -> Client: Response \createJobs
+deactivate API
+
+Client > API: POST \action {type: sendJettons}
+activate API
+API > db: Update jobs [in_progress status]
+activate db
+db --> API: Jobs result
+deactivate db
+
+API > Jetton: POST \sendMessage
+activate Jetton
+Jetton > TON: Send BOC
+activate TON
+TON > Jetton: Result BOC
+deactivate TON
+Jetton > API: Result \sendMessage
+deactivate Jetton
+
+API > db: Update jobs [completed status]
+activate db
+db --> API: result
+deactivate db
+
+API > db: Update limit
+activate db
+db --> API: result
+deactivate db
+
+
+API -> Client: redirect to NFT page
+deactivate API
+
+Client > API: GET \collection
+activate API
+API > NFT: GET \collection
+activate NFT
+NFT > TON: get collection items
+activate TON
+TON > NFT: items json
+deactivate TON
+NFT > API: response items
+deactivate NFT
+API > Client: result \collection
+deactivate API
+Client > Client: select NFT
+Client > API: POST \action {type: sendNFT}
+
+activate API
+API > db: Update jobs [in_progress status]
+activate db
+db --> API: Jobs result
+deactivate db
+
+API > NFT: POST \sendMessage
+activate NFT
+NFT > TON: Send BOC
+activate TON
+TON > NFT: Result BOC
+deactivate TON
+NFT > API: Result \sendMessage
+deactivate NFT
+
+API > db: Update jobs [completed status]
+activate db
+db --> API: result
+deactivate db
+API > Client: result
+deactivate API
+```
+
+</details>
