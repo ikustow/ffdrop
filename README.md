@@ -146,6 +146,8 @@ You can research them using the following links to the repositories.
 | NFT Service | [﻿github.com/ikustow/sender](https://github.com/ikustow/sender)  |
 | Jetton Service | [﻿github.com/ikustow/jettonflow](https://github.com/ikustow/jettonflow)  |
 ### API GATAWAY DESCRIPTION
+[OPENAPI_SwaggerHub](https://app.swaggerhub.com/apis/IKUSTOVDEV/airdrop/1.0.0)
+
 The API Gateway is built using a low-code system called Buildship. Its primary role is to act as a bridge between the main application on FlutterFlow and the microservices and database.
 
 ![api_ex.png](readme_assets%2Fapi_ex.png)
