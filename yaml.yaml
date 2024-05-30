@@ -1,121 +1,230 @@
-openapi: 3.0.2
+openapi: 3.0.3
 info:
   version: 1.0.0
-  title: First Project
+  title: AirdropApp
   contact:
     url: https://buildship.com
-  description: This API has been created using BuildShip.
+  description: This API of PoC App
 servers:
-  - url: https://3rypje.buildship.run
+  - url: https://3r.buildship.run
 paths:
   /action:
     post:
       x-workflow-id: yCNWbrFmOx9WCaXvsaXa
       operationId: post_action
-      responses:
-        default:
-          description: Response Unknown
+      summary: Perform an action
+      description: Endpoint to perform a specific action.
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              description: Body of the request
-              type: object
-              title: Body
-              properties: {}
+              $ref: '#/components/schemas/ActionRequest'
+      responses:
+        '200':
+          description: Action performed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResponse'
+        default:
+          description: Unknown error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /checkUser:
     get:
       x-workflow-id: mCI8k8XrU7oPnpKNS4JB
       operationId: get_checkUser
+      summary: Check user status
+      description: Endpoint to check the status of a user by address.
+      parameters:
+        - name: address
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Address of the user to check
       responses:
-        2XX:
-          description: ""
+        '200':
+          description: User status retrieved successfully
           content:
             application/json:
               schema:
-                oneOf:
-                  - type: object
-                    properties: {}
-                  - type: object
-                    properties: {}
-      requestBody:
-        content:
-          application/json:
-            schema:
-              description: Body of the request
-              type: object
-              title: Body
-              properties: {}
+                $ref: '#/components/schemas/CheckUserResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /createJobs:
     post:
       x-workflow-id: aH4JzEPHAxpwKVolAmE1
       operationId: post_createJobs
-      responses:
-        "200":
-          description: ""
-          content:
-            application/json:
-              schema:
-                type: string
-        "400":
-          description: ""
-          content:
-            application/json:
-              schema:
-                type: string
-        "404":
-          description: ""
-          content:
-            application/json:
-              schema:
-                type: string
+      summary: Create jobs
+      description: Endpoint to create new jobs. The jobs can be of two types- sending jettons or NFTs.
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              description: Body of the request
-              type: object
-              title: Body
-              properties: {}
-  /chekLimit:
+              $ref: '#/components/schemas/CreateJobsRequest'
+      responses:
+        '200':
+          description: Jobs created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateJobsResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /checkLimit:
     get:
       x-workflow-id: NYcu63lQ8GVtB0C2xcoD
-      operationId: get_chekLimit
-      description: ""
+      operationId: get_checkLimit
+      summary: Check limit
+      description: Endpoint to check the current limit.
       responses:
-        2XX:
-          description: ""
+        '200':
+          description: Limit retrieved successfully
           content:
             application/json:
               schema:
-                type: object
-                properties: {}
-      requestBody:
-        content:
-          application/json:
-            schema:
-              description: Body of the request
-              type: object
-              title: Body
-              properties: {}
+                $ref: '#/components/schemas/CheckLimitResponse'
+        '404':
+          description: Entity not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /info:
     post:
       x-workflow-id: 6WzXcidfUyI1MmkKSnvm
       operationId: post_info
-      responses:
-        2XX:
-          description: ""
-          content:
-            application/json:
-              schema:
-                type: object
-                properties: {}
+      summary: Submit address information
+      description: Endpoint to submit an address and retrieve related information.
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              description: Body of the request
-              type: object
-              title: Body
-              properties: {}
-
+              $ref: '#/components/schemas/InfoRequest'
+      responses:
+        '200':
+          description: Information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InfoResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ActionRequest:
+      type: object
+      properties:
+        actionType:
+          type: string
+          description: Type of the action to perform
+          enum:
+            - collection
+            - check_jobs
+            - send_nft
+            - send_jettons
+            - update_limit
+        address:
+          type: string
+          description: Optional. Address for the action
+        master:
+          type: string
+          description: Optional. Master key for the action
+    ActionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+    CheckUserResponse:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+            description: User ID
+          created_at:
+            type: string
+            format: date-time
+            description: Creation timestamp
+          address:
+            type: string
+            description: User address
+          is_claimed:
+            type: boolean
+            description: Claim status
+    CreateJobsRequest:
+      type: object
+      properties:
+        address:
+          type: string
+          description: Address to create jobs for
+    CreateJobsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Indicates if the jobs were created successfully
+        message:
+          type: string
+          description: Detailed message about the job creation status
+    CheckLimitResponse:
+      type: object
+      properties:
+        limit:
+          type: integer
+    InfoRequest:
+      type: object
+      properties:
+        address:
+          type: string
+          description: Address to retrieve information for
+    InfoResponse:
+      type: object
+      properties:
+        ton:
+          type: object
+          properties:
+            value:
+              type: number
+              description: TON value
+        jettons:
+          type: object
+          properties:
+            name:
+              type: string
+              description: Name of the jetton
+            balance:
+              type: integer
+              description: Jetton balance
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
