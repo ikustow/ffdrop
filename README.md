@@ -204,6 +204,7 @@ deactivate Client
 The airdrop claim process involves checking the user's status, generating jobs for transactions, followed by a redirect to the NFT page where the user can select an NFT and receive their unique asset.
 
 #### Demo
+![claim-gif.gif](readme_assets%2Fclaim-gif.gif)
 #### Sequence diagram
 
 ![claim_seq.png](readme_assets%2Fclaim_seq.png)
