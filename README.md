@@ -57,7 +57,7 @@ Application Architecture
 | UC4 | Redirect to NFT Page | API | API redirects the client to the NFT page after sending Jettons. | Jettons sent | Client on the NFT page |
 | UC5 | Get Collection | Client | The client requests the NFT collection via API Gateway. | Client on the NFT page | Receive NFT collection |
 | UC6 | Send NFT | Client | The client initiates sending NFT via API Gateway. | NFT selected | NFT sent, job status updated |
-### What Has Been Done So Far
+### What Has Been Before Dev Process
 - **Custom Token Deployment**: A custom token was deployed using a standard token contract.
 
 ![jettons.png](readme_assets%2Fjettons.png)
